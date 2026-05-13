@@ -1,0 +1,61 @@
+#include "BluetoothSerial.h"
+
+// Configuración de Bluetooth
+BluetoothSerial SerialBT;
+String nombreDispositivo = "Esp32_leds-rele";
+
+// Definición de Pines (GPIO)
+const int LUZ_1 = 2;  // Habitación 1
+const int LUZ_2 = 4;  // Habitación 2
+const int LUZ_3 = 5;  // Habitación 3
+const int RELE = 18;  // 🔹 NUEVO: Relé
+
+void setup() {
+  Serial.begin(115200);
+
+  if (!SerialBT.begin(nombreDispositivo)) {
+    Serial.println("¡Error al iniciar Bluetooth!");
+  } else {
+    Serial.println("Bluetooth listo. Conéctate a: " + nombreDispositivo);
+  }
+
+  // Configuración de pines
+  pinMode(LUZ_1, OUTPUT);
+  pinMode(LUZ_2, OUTPUT);
+  pinMode(LUZ_3, OUTPUT);
+  pinMode(RELE, OUTPUT);  // 🔹 NUEVO
+
+  // Todo apagado
+  digitalWrite(LUZ_1, LOW);
+  digitalWrite(LUZ_2, LOW);
+  digitalWrite(LUZ_3, LOW);
+  digitalWrite(RELE, LOW);  // 🔹 NUEVO
+}
+
+void loop() {
+  if (SerialBT.available()) {
+    char letraRecibida = SerialBT.read();
+    Serial.print("Comando detectado: ");
+    Serial.println(letraRecibida);
+
+    switch (letraRecibida) {
+      // LEDs
+      case 'A': digitalWrite(LUZ_1, HIGH); break;
+      case 'a': digitalWrite(LUZ_1, LOW); break;
+
+      case 'B': digitalWrite(LUZ_2, HIGH); break;
+      case 'b': digitalWrite(LUZ_2, LOW); break;
+
+      case 'C': digitalWrite(LUZ_3, HIGH); break;
+      case 'c': digitalWrite(LUZ_3, LOW); break;
+
+      // 🔹 RELÉ
+      case 'D': digitalWrite(RELE, HIGH); break;  // Encender
+      case 'd': digitalWrite(RELE, LOW); break;   // Apagar
+
+      default:
+        break;
+    }
+  }
+  delay(10);
+}
