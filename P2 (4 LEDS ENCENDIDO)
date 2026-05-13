@@ -1,0 +1,66 @@
+#include "BluetoothSerial.h"
+
+// Configuración de Bluetooth
+BluetoothSerial SerialBT;
+String nombreDispositivo = "ESP32_Mecatronica_Carlos";
+
+// Definición de Pines (GPIO)
+const int LUZ_1 = 2; // Habitación 1
+const int LUZ_2 = 4; // Habitación 2
+const int LUZ_3 = 5; // Habitación 3
+const int LUZ_4 = 18; // Habitación 4 (nuevo)
+
+// Setup
+void setup() {
+  Serial.begin(115200);
+  
+  // Iniciar Bluetooth
+  if(!SerialBT.begin(nombreDispositivo)){
+    Serial.println("¡Error al iniciar Bluetooth!");
+  } else {
+    Serial.println("Bluetooth listo. Conéctate a: " + nombreDispositivo);
+  }
+
+  // Configuración de pines
+  pinMode(LUZ_1, OUTPUT);
+  pinMode(LUZ_2, OUTPUT);
+  pinMode(LUZ_3, OUTPUT);
+  pinMode(LUZ_4, OUTPUT);
+
+  // Iniciar todo apagado
+  digitalWrite(LUZ_1, LOW);
+  digitalWrite(LUZ_2, LOW);
+  digitalWrite(LUZ_3, LOW);
+  digitalWrite(LUZ_4, LOW);
+}
+
+// Loop
+void loop() {
+  if (SerialBT.available()) {
+    char letraRecibida = SerialBT.read();
+    Serial.print("Comando detectado: ");
+    Serial.println(letraRecibida);
+
+    switch (letraRecibida) {
+      // LED 1
+      case 'A': digitalWrite(LUZ_1, HIGH); break;
+      case 'a': digitalWrite(LUZ_1, LOW);  break;
+
+      // LED 2
+      case 'B': digitalWrite(LUZ_2, HIGH); break;
+      case 'b': digitalWrite(LUZ_2, LOW);  break;
+
+      // LED 3
+      case 'C': digitalWrite(LUZ_3, HIGH); break;
+      case 'c': digitalWrite(LUZ_3, LOW);  break;
+
+      // LED 4 (nuevo)
+      case 'D': digitalWrite(LUZ_4, HIGH); break;
+      case 'd': digitalWrite(LUZ_4, LOW);  break;
+
+      default:
+        break;
+    }
+  }
+  delay(10);
+}
