@@ -1,0 +1,69 @@
+#include "BluetoothSerial.h"
+
+BluetoothSerial SerialBT;
+
+const int RELE = 18;
+const int TRIG = 22;
+const int ECHO = 23;
+
+bool sensorActivo = false;
+
+void setup() {
+  Serial.begin(115200);
+  SerialBT.begin("SensorFocoyRele");
+
+  pinMode(RELE, OUTPUT);
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+
+  digitalWrite(RELE, HIGH); // 🔥 inicia APAGADO (clave)
+}
+
+void loop() {
+
+  while (SerialBT.available()) {
+    char letra = SerialBT.read();
+
+    if (letra == 'a') {
+      sensorActivo = true;
+    }
+
+    if (letra == 'A') {
+      sensorActivo = false;
+    }
+  }
+
+  // 🔴 sistema apagado → foco OFF
+  if (!sensorActivo) {
+    digitalWrite(RELE, HIGH); // 🔥 apagado
+    delay(100);
+    return;
+  }
+
+  // 🟢 sensor activo
+  long duracion;
+  int distancia;
+
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+
+  duracion = pulseIn(ECHO, HIGH, 30000);
+  distancia = duracion * 0.034 / 2;
+
+  if (distancia > 0 && distancia < 400) {
+    SerialBT.print("Distancia: ");
+    SerialBT.print(distancia);
+    SerialBT.println(" cm");
+  }
+
+  if (distancia <= 20) {
+    digitalWrite(RELE, LOW);  // 🔥 encender foco
+  } else {
+    digitalWrite(RELE, HIGH); // apagar foco
+  }
+
+  delay(300);
+}
