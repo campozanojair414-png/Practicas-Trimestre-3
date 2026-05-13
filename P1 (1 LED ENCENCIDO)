@@ -1,0 +1,50 @@
+#include "BluetoothSerial.h"
+
+// Configuración de Bluetooth
+BluetoothSerial SerialBT;
+String nombreDispositivo = "ESP32_Mecatronica_Carlos";
+
+// Pin del LED
+const int LED = 2;
+
+// Setup
+void setup() {
+  Serial.begin(115200);
+
+  // Iniciar Bluetooth
+  if (!SerialBT.begin(nombreDispositivo)) {
+    Serial.println("¡Error al iniciar Bluetooth!");
+  } else {
+    Serial.println("Bluetooth listo. Conéctate a: " + nombreDispositivo);
+  }
+
+  // Configuración del pin
+  pinMode(LED, OUTPUT);
+
+  // Iniciar apagado
+  digitalWrite(LED, LOW);
+}
+
+// Loop
+void loop() {
+  if (SerialBT.available()) {
+    char letraRecibida = SerialBT.read();
+    Serial.print("Comando detectado: ");
+    Serial.println(letraRecibida);
+
+    switch (letraRecibida) {
+      case 'A': 
+        digitalWrite(LED, HIGH); // Encender
+        break;
+
+      case 'a': 
+        digitalWrite(LED, LOW); // Apagar
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  delay(10);
+}
